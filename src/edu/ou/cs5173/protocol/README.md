@@ -25,18 +25,18 @@ Part | Name | Description
 
 There are several types of message. The type of message determines what the payload should be.
 
-Type | Expected payload | Expected behaviour
------|------------------|-------------------
-`INITIATE` | `""` | The sender would like to initiate communication with the recipient. The recipient should reply with `RESPONDENT_CHALLENGE`.
-`RESPONDENT_CHALLENGE` | an integer | A proof-of-identity challenge from the respondent to the initiator. The initiator should reply with `INITIATOR_CHALLENGE`.
-`INITIATOR_CHALLENGE` | challenge response + `SEPARATOR` + an integer | The payload is a response to the respondent's challenge, plus a challenge set by the initiator. The respondent should reply with `CHALLENGE_RESPONSE`.
-`CHALLENGE_RESPONSE` | challenge response | The respondent's reply to the initiator's challenge. If the initiator receives this message, it may assume it has passed the challenge set by the respondent. The initiator should reply with `CHALLENGE_SUCCESS`.
-`CHALLENGE_SUCCESS` | `""` | The respondent has passed the initiator's challenge. All challenges are now complete and communication can now begin.
-`CHALLENGE_FAILED` | `""` | A challenge has been failed. The clients should terminate this session and return to `INITIATE`.
-`UPDATE_KEY` | `""` | Update the session key. Done by incrementing the 'state' variable.
-`MESSAGE` | a message | A message from one party to the other.
-`ABORT` | `""` | Terminate this session. Further communication will be ignored, apart from `INITIATE`.
-`MALFORMED_MESSAGE` | any | This message couldn't be parsed. Should not be sent intentionally.
+Type | Encrypted? | Expected payload | Expected behaviour
+-----|------------|------------------|-------------------
+`INITIATE` | no | `null` | The sender would like to initiate communication with the recipient. The recipient should reply with `RESPONDENT_CHALLENGE`.
+`RESPONDENT_CHALLENGE` | no | an integer | A proof-of-identity challenge from the respondent to the initiator. The initiator should reply with `INITIATOR_CHALLENGE`.
+`INITIATOR_CHALLENGE` | no | challenge response + `SEPARATOR` + an integer | The payload is a response to the respondent's challenge, plus a challenge set by the initiator. The respondent should reply with `CHALLENGE_RESPONSE`.
+`CHALLENGE_RESPONSE` | no | challenge response | The respondent's reply to the initiator's challenge. If the initiator receives this message, it may assume it has passed the challenge set by the respondent. The initiator should reply with `CHALLENGE_SUCCESS`.
+`CHALLENGE_SUCCESS` | yes | `null` | The respondent has passed the initiator's challenge. All challenges are now complete and communication can now begin.
+`CHALLENGE_FAILED` | no | `null` | A challenge has been failed. The clients should terminate this session and return to `INITIATE`.
+`UPDATE_KEY` | yes | `null` | Update the session key. Done by incrementing the 'state' variable.
+`MESSAGE` | yes | a message | A message from one party to the other.
+`ABORT` | `null` | yes | Terminate this session. Further communication will be ignored, apart from `INITIATE`.
+`MALFORMED_MESSAGE` | either | any | This message couldn't be parsed. Should not be sent intentionally.
 
 ### Challenges
 

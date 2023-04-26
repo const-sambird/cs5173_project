@@ -18,6 +18,7 @@ public class User {
     private String encrypt_key;
     private String decrypt_key;
     private int state;
+    private boolean trustsOther = false;
 
     public User(String name, String partner, String password) {
         this.name = name;
@@ -77,7 +78,10 @@ public class User {
         String correctInput = Integer.toString(this.challenge) + this.decrypt_key;
         String correctAnswer = new String(md.digest(correctInput.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
 
-        return correctAnswer.equals(answer);
+        boolean correct = correctAnswer.equals(answer);
+
+        this.trustsOther = correct;
+        return correct;
     }
 
     public String solveChallenge(int challenge) {
@@ -144,5 +148,14 @@ public class User {
         SecretKey decKey = this.getDecryptionKey(salt);
 
         return CryptoUtilities.decrypt(ciphertext, decKey, iv);
+    }
+
+    // just some getters
+    public String getName() {
+        return this.name;
+    }
+
+    public String getPartner() {
+        return this.partner;
     }
 }
