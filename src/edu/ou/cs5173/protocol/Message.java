@@ -2,7 +2,6 @@ package edu.ou.cs5173.protocol;
 
 public class Message {
     private final char SEPARATOR = '\u001f';
-    private final char DELIMITER = '\u001e';
 
     public String sender;
     public String recipient;
@@ -25,9 +24,14 @@ public class Message {
         this.payload = payload;
     }
 
+    /**
+     * Creates a message object, given a serialised message string.
+     * This creates an object representation of a message we are **receiving**.
+     *
+     * @param serialisedMessage
+     */
     public Message(String serialisedMessage) {
-        String noDelimiter = serialisedMessage.replaceAll(""+DELIMITER, "");
-        String[] fields = noDelimiter.split(""+SEPARATOR);
+        String[] fields = serialisedMessage.split(""+SEPARATOR);
 
         if (fields.length != 4) {
             // we've lost a field somewhere
@@ -137,7 +141,7 @@ public class Message {
     public String serialise() {
         String type = this.messageTypeToString(this.messageType);
         
-        return type + SEPARATOR + sender + SEPARATOR + recipient + SEPARATOR + payload + DELIMITER;
+        return type + SEPARATOR + sender + SEPARATOR + recipient + SEPARATOR + payload;
     }
 
     @Override
