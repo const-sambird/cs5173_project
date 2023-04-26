@@ -1,7 +1,7 @@
 package edu.ou.cs5173.protocol;
 
 public class Message {
-    private final char SEPARATOR = '\u001f';
+    public static final char SEPARATOR = '\u001f';
 
     public String sender;
     public String recipient;
