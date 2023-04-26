@@ -35,7 +35,7 @@ Type | Encrypted? | Expected payload | Expected behaviour
 `CHALLENGE_FAILED` | no | `null` | A challenge has been failed. The clients should terminate this session and return to `INITIATE`.
 `UPDATE_KEY` | yes | `null` | Update the session key. Done by incrementing the 'state' variable.
 `MESSAGE` | yes | a message | A message from one party to the other.
-`ABORT` | `null` | yes | Terminate this session. Further communication will be ignored, apart from `INITIATE`.
+`ABORT` | yes | `null` | Terminate this session. Further communication will be ignored, apart from `INITIATE`.
 `MALFORMED_MESSAGE` | either | any | This message couldn't be parsed. Should not be sent intentionally.
 
 ### Challenges

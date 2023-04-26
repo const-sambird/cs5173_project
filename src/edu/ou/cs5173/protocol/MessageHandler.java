@@ -2,20 +2,24 @@ package edu.ou.cs5173.protocol;
 
 import java.io.PrintWriter;
 
+import edu.ou.cs5173.ui.MessageWriter;
+
 public class MessageHandler {
     private String name;
     private String password;
     private User user;
     private PrintWriter out;
+    private MessageWriter mw;
     
     public boolean hasUser() {
         return user != null;
     }
 
-    public MessageHandler(String name, String password, PrintWriter out) {
+    public MessageHandler(String name, String password, PrintWriter out, MessageWriter mw) {
         this.name = name;
         this.password = password;
         this.out = out;
+        this.mw = mw;
     }
 
     public void setPartner(String partner) {
@@ -31,6 +35,7 @@ public class MessageHandler {
      * @return whether or not we should terminate
      */
     public boolean handle(String message) {
+        mw.writeReceivedCommunication(message);
         boolean isDecrypted = message.contains(Message.USER_AGENT);
         Message m;
 
@@ -42,6 +47,7 @@ public class MessageHandler {
 
             try {
                 decrypted = this.user.decrypt(message);
+                mw.writeReceivedCommunication(decrypted);
             } catch (Exception e) {
                 System.err.println("Couldn't decrypt a received message, is the key bad?");
                 System.err.println(message);
@@ -154,11 +160,14 @@ public class MessageHandler {
         String toSend;
 
         if (this.shouldEncrypt(m.getType())) {
-            toSend = this.user.encrypt(m.serialise());
+            String s = m.serialise();
+            mw.writeSentCommunication(s);
+            toSend = this.user.encrypt(s);
         } else {
             toSend = m.serialise();
         }
 
+        mw.writeSentCommunication(toSend);
         out.println(toSend);
     }
 }

@@ -17,31 +17,44 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
+import edu.ou.cs5173.io.Server;
+import edu.ou.cs5173.ui.MessageWriter;
+
 public class Main {
     public static void main(String[] args) {
         new Main();
     }
 
+    // swing components
     private JFrame frame;
     private JTextArea chat;
     private JTextField chatBox;
     private JTextField username;
     private JTextField password;
     private JButton doLogin;
-    private boolean isLoggedIn = false;
     private JLabel loginStatus;
     private JLabel status;
     private Border border;
     private JScrollPane scroll;
 
+    // app state
+    private boolean isLoggedIn = false;
+    private String name;
+    private String pwd;
+    private Server server;
+    private MessageWriter mw;
+
     public Main() {
         this.setupGui();        
+        this.server = new Server();
+        this.mw = new MessageWriter(this.chat);
     }
 
     private void setupGui() {
         // i hate swing i hate swing i hate swing i hate swing i hate swing i ha
         JPanel gui = new JPanel(new BorderLayout(5, 5));
-        this.chat = new JTextArea(10, 50);
+        this.chat = new JTextArea(20, 100);
+        this.chat.setEditable(false);
         JPanel login = new JPanel();
         login.setLayout(new FlowLayout(FlowLayout.TRAILING));
         username = new JTextField("Username");
