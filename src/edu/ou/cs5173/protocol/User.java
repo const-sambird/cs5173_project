@@ -158,4 +158,8 @@ public class User {
     public String getPartner() {
         return this.partner;
     }
+
+    public boolean doesTrustOther() {
+        return this.trustsOther;
+    }
 }

@@ -1,6 +1,5 @@
 package edu.ou.cs5173.protocol;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 public class MessageHandler {
@@ -38,6 +37,7 @@ public class MessageHandler {
         if (isDecrypted) {
             m = new Message(message);
         } else {
+            if (!this.hasUser()) return false;
             String decrypted;
 
             try {
@@ -123,18 +123,24 @@ public class MessageHandler {
                 this.user = null;
                 break;
             case UPDATE_KEY:
-                this.user.updateState();
+                if (this.user.doesTrustOther()) {
+                    this.user.updateState();
+                }
                 break;
             case MESSAGE:
                 // TODO: despatch the message to the UI
                 // which obviously hasn't been written yet
-                String text = m.getPayload();
-                System.out.println(text);
+                if (this.user.doesTrustOther()) {
+                    String text = m.getPayload();
+                    System.out.println(text);
+                }
                 break;
             case ABORT:
                 // aye aye, cap'n
-                this.user = null;
-                return true;
+                if (this.user.doesTrustOther()) {
+                    this.user = null;
+                    return true;
+                }
         }
 
         return false;
