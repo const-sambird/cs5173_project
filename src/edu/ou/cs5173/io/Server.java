@@ -40,11 +40,7 @@ public class Server {
                 
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    if (DELIMITER.equals(inputLine)) {
-                        out.println("bye");
-                        break;
-                    }
-                    out.println(inputLine);
+                    boolean terminate;
                 }
 
                 in.close();

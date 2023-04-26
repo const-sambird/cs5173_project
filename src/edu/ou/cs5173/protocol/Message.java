@@ -3,10 +3,10 @@ package edu.ou.cs5173.protocol;
 public class Message {
     public static final char SEPARATOR = '\u001f';
 
-    public String sender;
-    public String recipient;
-    public MessageType messageType;
-    public String payload;
+    private String sender;
+    private String recipient;
+    private MessageType messageType;
+    private String payload;
 
     /**
      * Creates a message object, given parameters.
@@ -147,5 +147,22 @@ public class Message {
     @Override
     public String toString() {
         return this.serialise();
+    }
+
+    // getters down here
+    public String getSender() {
+        return this.sender;
+    }
+
+    public String getRecipient() {
+        return this.recipient;
+    }
+
+    public MessageType getType() {
+        return this.messageType;
+    }
+
+    public String getPayload() {
+        return this.payload;
     }
 }

@@ -129,7 +129,7 @@ public class User {
         }
     }
 
-    public String decrypt(String message) {
+    public String decrypt(String message) throws Exception {
         String[] fields = message.split("" + Message.SEPARATOR);
         
         if (fields.length != 3) {
@@ -143,11 +143,6 @@ public class User {
         String ciphertext = fields[2];
         SecretKey decKey = this.getDecryptionKey(salt);
 
-        try {
-            return CryptoUtilities.decrypt(ciphertext, decKey, iv);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
+        return CryptoUtilities.decrypt(ciphertext, decKey, iv);
     }
 }
