@@ -2,7 +2,7 @@
 
 ## Communications
 
-Each VGCMP communication is sent in three parts, each divided by a `SEPARATOR` defined in [Message.java](./Message.java).
+Each VGCMP communication is either *encrypted* or *unencrypted*. Encrypted communications are sent in three parts, each divided by a `SEPARATOR` defined in [Message.java](./Message.java).
 
 Part | Name | Description
 -----|------|------------
@@ -12,7 +12,7 @@ Part | Name | Description
 
 ## Messages
 
-Once the message ciphertext has been decrypted, it is similarly subdivided into four parts, broken up by the same `SEPARATOR`.
+Once the message ciphertext has been decrypted, or if the message was not encrypted at all, it is similarly subdivided into four parts, broken up by the same `SEPARATOR`.
 
 Part | Name | Description
 -----|------|------------
@@ -29,7 +29,7 @@ Type | Encrypted? | Expected payload | Expected behaviour
 -----|------------|------------------|-------------------
 `INITIATE` | no | `null` | The sender would like to initiate communication with the recipient. The recipient should reply with `RESPONDENT_CHALLENGE`.
 `RESPONDENT_CHALLENGE` | no | an integer | A proof-of-identity challenge from the respondent to the initiator. The initiator should reply with `INITIATOR_CHALLENGE`.
-`INITIATOR_CHALLENGE` | no | challenge response + `SEPARATOR` + an integer | The payload is a response to the respondent's challenge, plus a challenge set by the initiator. The respondent should reply with `CHALLENGE_RESPONSE`.
+`INITIATOR_CHALLENGE` | no | challenge response + `---` + an integer | The payload is a response to the respondent's challenge, plus a challenge set by the initiator. The respondent should reply with `CHALLENGE_RESPONSE`.
 `CHALLENGE_RESPONSE` | no | challenge response | The respondent's reply to the initiator's challenge. If the initiator receives this message, it may assume it has passed the challenge set by the respondent. The initiator should reply with `CHALLENGE_SUCCESS`.
 `CHALLENGE_SUCCESS` | yes | `null` | The respondent has passed the initiator's challenge. All challenges are now complete and communication can now begin.
 `CHALLENGE_FAILED` | no | `null` | A challenge has been failed. The clients should terminate this session and return to `INITIATE`.
@@ -44,6 +44,6 @@ An example challenge scheme between Alice (initiator) and Bob (respondent):
 
 1. Alice: `INITIATE`
 2. Bob : `RESPONDENT_CHALLENGE`, 42
-3. Alice: `INITIATOR_CHALLENGE`, `SHA_256(42 + K_{Alice-Bob}) + SEPARATOR + 18`
+3. Alice: `INITIATOR_CHALLENGE`, `SHA_256(42 + K_{Alice-Bob}) + "---" + 18`
 4. Bob: `CHALLENGE_RESPONSE`, `SHA_256(18 + K_{Bob-Alice})`
 5. Alice: `CHALLENGE_SUCCESS`

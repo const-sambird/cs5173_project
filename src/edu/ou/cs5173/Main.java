@@ -20,6 +20,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
+import edu.ou.cs5173.io.Container;
 import edu.ou.cs5173.io.Server;
 import edu.ou.cs5173.ui.MessageWriter;
 
@@ -49,8 +50,8 @@ public class Main {
     private String pwd;
     private MessageWriter mw;
 
-    // socket threads
-    Thread client;
+    // socket thread
+    Container container;
     Thread server;
 
     public Main() {
@@ -165,12 +166,14 @@ public class Main {
                 status.setText("Waiting for partner...");
                 username.setEditable(false);
                 password.setEditable(false);
+                container = new Container();
 
                 new Thread(new Runnable() {
                     public void run() {
                         int portInt = Integer.parseInt(thisPort);
                         try {
-                            new Server().start(portInt, user, pass, mw);
+                            container.setServer(new Server());
+                            container.getServer().start(portInt, user, pass, mw);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                             mw.writeInfo("An IOException occurred when spinning up the server");
