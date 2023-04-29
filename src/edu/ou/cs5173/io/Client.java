@@ -11,7 +11,7 @@ import edu.ou.cs5173.protocol.MessageHandler;
 import edu.ou.cs5173.protocol.MessageType;
 import edu.ou.cs5173.ui.MessageWriter;
 
-public class Client {
+public class Client implements MessageSender {
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
@@ -20,15 +20,14 @@ public class Client {
     private String partner;
     private MessageWriter mw;
     private MessageHandler handler;
+    private OutBuffer o;
 
-    public boolean start(String ip, int port, String name, String password, String partner, MessageWriter mw) {
-        System.out.println("client-presocket");
+    public boolean start(String ip, int port, String name, String password, String partner, MessageWriter mw, OutBuffer o) {
         try {
             clientSocket = new Socket(ip, port);
         } catch (IOException ex) {
             return false;
         }
-        System.out.println("client");
         try {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -39,6 +38,31 @@ public class Client {
         this.password = password;
         this.partner = partner;
         this.mw = mw;
+        this.o = o;
+        this.handler = new MessageHandler(this.name, this.password, out, mw);
+
+        this.sendInitiate();
+
+        new Thread(new Runnable() {
+            public void run() {
+                String inputLine;
+                boolean done = false;
+                try {
+                    do {
+                        if (o.has()) {
+                            sendMessage(o.get());
+                        }
+                        if (clientSocket.getInputStream().available() > 0) {
+                            inputLine = in.readLine();
+                            done = handler.handle(inputLine);
+                        }
+                    } while (!done);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }).start();
+
         return true;
     }
 
@@ -48,14 +72,8 @@ public class Client {
     }
 
     public void sendInitiate() {
-        System.out.println("sendinit");
         Message hello = new Message(name, partner, MessageType.INITIATE, "null");
-        try {
-            this.sendMessage(hello.serialise());
-        } catch (IOException ex) {
-            mw.writeInfo("There was an issue trying to initiate communication");
-            ex.printStackTrace();
-        }
+        o.add(hello.serialise());
     }
 
     public void sendChatMessage(String msg) {

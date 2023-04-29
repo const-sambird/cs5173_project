@@ -7,11 +7,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import edu.ou.cs5173.io.SocketContainer.ContainerState;
 import edu.ou.cs5173.protocol.MessageHandler;
 import edu.ou.cs5173.ui.MessageWriter;
 
-public class Server {
+public class Server implements MessageSender {
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
@@ -20,56 +19,29 @@ public class Server {
     private String password;
     private MessageWriter mw;
     private MessageHandler handler;
-    private SocketContainer container;
 
-    public void start(int port, String name, String password, MessageWriter mw, SocketContainer container) throws IOException {
+    public void start(int port, String name, String password, MessageWriter mw, OutBuffer o) throws IOException {
         System.out.println("server");
         this.serverSocket = new ServerSocket(port);
         this.clientSocket = serverSocket.accept();
         this.name = name;
         this.password = password;
         this.mw = mw;
-        this.container = container;
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        this.exec();
-    }
-
-    // this use-case for overloads is considered by the international court of justice to be a war crime
-    public void start(int port, String name, String password, MessageWriter mw, SocketContainer container, PrintWriter out, BufferedReader in) throws IOException {
-        System.out.println("server");
-        this.serverSocket = new ServerSocket(port);
-        this.clientSocket = serverSocket.accept();
-        this.name = name;
-        this.password = password;
-        this.mw = mw;
-        this.container = container;
-        this.out = out;
-        this.in = in;
-        this.exec();
-    }
-
-    private void exec() throws IOException {
         this.handler = new MessageHandler(this.name, this.password, out, mw);
-        this.container.createClientThreadIfNotExists();
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            // look i'm going to keep it real with you i don't think this will throw
-        }
-        in = container.getClient().getIn();
-        out = container.getClient().getOut();
-        if (container.getContainerState() == ContainerState.SERVER_FIRST) {
-            container.getClient().sendInitiate();
-        }
         String inputLine;
+        boolean done = false;
 
-        while ((inputLine = in.readLine()) != null) {
-            boolean terminate = handler.handle(inputLine);
-            if (terminate) {
-                break;
+        do {
+            if (o.has()) {
+                this.sendMessage(o.get());
             }
-        }
+            if (clientSocket.getInputStream().available() > 0) {
+                inputLine = in.readLine();
+                done = handler.handle(inputLine);
+            }
+        } while (!done);
 
         mw.writeInfo("Session ended.");
         in.close();

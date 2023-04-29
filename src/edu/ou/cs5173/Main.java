@@ -22,6 +22,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
 import edu.ou.cs5173.io.SocketContainer;
+import edu.ou.cs5173.io.OutBuffer;
 import edu.ou.cs5173.io.Server;
 import edu.ou.cs5173.ui.MessageWriter;
 
@@ -54,11 +55,13 @@ public class Main {
 
     // socket thread
     SocketContainer container;
+    OutBuffer o;
     Thread server;
 
     public Main() {
         this.setupGui();
         this.mw = new MessageWriter(this.chat);
+        this.o = new OutBuffer();
     }
 
     private void setupGui() {
@@ -190,18 +193,16 @@ public class Main {
                     }
                 });
 
-                Thread clientThread = new Thread(new Runnable(){
+                Thread clientThread = new Thread(new Runnable() {
                     public void run() {
                         boolean success = container.setClient();
                         if (!success) {
-                            container.resetClient();
-                            mw.writeInfo("Couldn't connect to the remote server on " + host + ":" + otherPort + ", waiting for partner...");
+                            serverThread.start();
                         }
-                        serverThread.start();
                     }
                 });
 
-                container = new SocketContainer(thisPort, host, otherPort, user, pass, other, mw, clientThread);
+                container = new SocketContainer(thisPort, host, otherPort, user, pass, other, mw, o);
 
                 clientThread.start();
             }

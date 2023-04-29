@@ -78,6 +78,9 @@ public class User {
         String correctInput = Integer.toString(this.challenge) + this.decrypt_key;
         String correctAnswer = new String(md.digest(correctInput.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
 
+        System.out.println("WANTED: " + correctAnswer);
+        System.out.println("GOT   : " + answer);
+
         boolean correct = correctAnswer.equals(answer);
 
         this.trustsOther = correct;
