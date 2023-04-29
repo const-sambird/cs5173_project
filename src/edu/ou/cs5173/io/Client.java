@@ -99,4 +99,10 @@ public class Client implements MessageSender {
     public PrintWriter getOut() {
         return this.out;
     }
+
+    public void sendChatMessage(Message m) {
+        if (handler == null) return;
+
+        handler.sendMessage(m);
+    }
 }

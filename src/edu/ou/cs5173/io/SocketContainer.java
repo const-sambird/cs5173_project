@@ -27,37 +27,37 @@ public class SocketContainer {
         this.o = o;
     }
 
-    public synchronized void setServer() throws IOException {
+    public void setServer() throws IOException {
         this.server = new Server();
         this.server.start(Integer.parseInt(thisPort), user, pass, mw, o);
     }
 
-    public synchronized Server getServer() {
+    public Server getServer() {
         return this.server;
     }
 
-    public synchronized boolean hasServer() {
+    public boolean hasServer() {
         return this.server != null;
     }
 
-    public synchronized boolean setClient() {
+    public boolean setClient() {
         this.client = new Client();
         return this.client.start(host, Integer.parseInt(port), user, pass, partner, mw, o);
     }
 
-    public synchronized Client getClient() {
+    public Client getClient() {
         return this.client;
     }
 
-    public synchronized void resetClient() {
+    public void resetClient() {
         this.client = null;
     }
 
-    public synchronized boolean hasClient() {
+    public boolean hasClient() {
         return this.client != null;
     }
 
-    public synchronized MessageSender getSender() {
+    public MessageSender getSender() {
         if (this.hasClient()) {
             return this.client;
         }

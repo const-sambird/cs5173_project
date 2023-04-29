@@ -22,6 +22,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
 import edu.ou.cs5173.io.SocketContainer;
+import edu.ou.cs5173.protocol.Message;
+import edu.ou.cs5173.protocol.MessageType;
+import edu.ou.cs5173.io.MessageSender;
 import edu.ou.cs5173.io.OutBuffer;
 import edu.ou.cs5173.io.Server;
 import edu.ou.cs5173.ui.MessageWriter;
@@ -128,9 +131,13 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String message = chatBox.getText();
+                System.out.println(message);
                 if (isLoggedIn) {
+                    System.out.println("loggedin");
                     chatBox.setText("");
                     mw.writeMessage(name, message);
+                    MessageSender sender = container.getSender();
+                    sender.sendChatMessage(new Message(username.getText(), partner.getText(), MessageType.MESSAGE, message));
                 }
             }
         };
@@ -197,6 +204,7 @@ public class Main {
                     public void run() {
                         boolean success = container.setClient();
                         if (!success) {
+                            container.resetClient();
                             serverThread.start();
                         }
                     }

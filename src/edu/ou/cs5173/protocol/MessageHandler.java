@@ -40,19 +40,19 @@ public class MessageHandler {
      * @return whether or not we should terminate
      */
     public boolean handle(String message) {
-        mw.writeReceivedCommunication(message);
         boolean isDecrypted = message.contains(Message.USER_AGENT);
         Message m;
 
         if (isDecrypted) {
+            mw.writeReceivedCommunication("[UNCRYPT] " + message);
             m = new Message(message);
         } else {
             if (!this.hasUser()) return false;
             String decrypted;
-
+            mw.writeReceivedCommunication("[ENCRYPT] " + message);
             try {
                 decrypted = this.user.decrypt(message);
-                mw.writeReceivedCommunication(decrypted);
+                mw.writeReceivedCommunication("[DECRYPT] " + decrypted);
             } catch (Exception e) {
                 System.err.println("Couldn't decrypt a received message, is the key bad?");
                 System.err.println(message);
@@ -141,11 +141,9 @@ public class MessageHandler {
                 }
                 break;
             case MESSAGE:
-                // TODO: despatch the message to the UI
-                // which obviously hasn't been written yet
                 if (this.user.doesTrustOther()) {
                     String text = m.getPayload();
-                    System.out.println(text);
+                    mw.writeMessage(m.getSender(), text);
                 }
                 break;
             case ABORT:
@@ -168,13 +166,13 @@ public class MessageHandler {
 
         if (shouldEncrypt(m.getType())) {
             String s = m.serialise();
-            mw.writeSentCommunication(s);
+            mw.writeSentCommunication("[DECRYPT] " + s);
             toSend = this.user.encrypt(s);
+            mw.writeSentCommunication("[ENCRYPT] " + toSend);
         } else {
             toSend = m.serialise();
+            mw.writeSentCommunication("[DECRYPT] " + toSend);
         }
-
-        mw.writeSentCommunication(toSend);
         out.println(toSend);
     }
 }
