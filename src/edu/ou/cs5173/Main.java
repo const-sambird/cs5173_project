@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -20,7 +21,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-import edu.ou.cs5173.io.Container;
+import edu.ou.cs5173.io.SocketContainer;
 import edu.ou.cs5173.io.Server;
 import edu.ou.cs5173.ui.MessageWriter;
 
@@ -38,6 +39,7 @@ public class Main {
     private JTextField ourPort;
     private JTextField username;
     private JTextField password;
+    private JTextField partner;
     private JButton doLogin;
     private JLabel loginStatus;
     private JLabel status;
@@ -51,11 +53,11 @@ public class Main {
     private MessageWriter mw;
 
     // socket thread
-    Container container;
+    SocketContainer container;
     Thread server;
 
     public Main() {
-        this.setupGui();        
+        this.setupGui();
         this.mw = new MessageWriter(this.chat);
     }
 
@@ -80,6 +82,7 @@ public class Main {
         login.setLayout(new FlowLayout(FlowLayout.TRAILING));
         username = new JTextField(10);
         password = new JTextField(10);
+        partner = new JTextField(10);
         loginStatus = new JLabel("Please log in.");
         doLogin = new JButton("Connect");
         doLogin.addActionListener(handleLogin());
@@ -87,6 +90,8 @@ public class Main {
         login.add(username);
         login.add(new JLabel("Password"));
         login.add(password);
+        login.add(new JLabel("Partner"));
+        login.add(partner);
         login.add(doLogin);
         login.add(loginStatus);
         JPanel bottom = new JPanel();
@@ -138,6 +143,7 @@ public class Main {
                 String thisPort = ourPort.getText();
                 String host = hostToConnect.getText();
                 String otherPort = portToConnect.getText();
+                String other = partner.getText();
 
                 if (thisPort == null || thisPort.strip().equals("")) {
                     status.setText("Bad port.");
@@ -159,27 +165,56 @@ public class Main {
                     return;
                 }
 
+                if (other == null || other.strip().equals("")) {
+                    status.setText("Bad partner username.");
+                    return;
+                }
+
                 name = user;
                 pwd = pass;
                 isLoggedIn = true;
                 loginStatus.setText("Logged in.");
-                status.setText("Waiting for partner...");
+                status.setText("Ready.");
                 username.setEditable(false);
                 password.setEditable(false);
-                container = new Container();
+                partner.setEditable(false);
 
-                new Thread(new Runnable() {
+                container = new SocketContainer(host, otherPort, user, pass, other, mw);
+
+                UncaughtExceptionHandler h = new UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread th, Throwable ex) {
+                        // if this throws, it's because there's an IOException in the client thread
+                        // because the socket failed to connect, so we should start the server instead
+                        container.resetClient();
+                        mw.writeInfo("Couldn't connect to the remote server on " + host + ":" + otherPort + ", waiting for partner...");
+                        new Thread(new Runnable() {
+                            public void run() {
+                                int portInt = Integer.parseInt(thisPort);
+                                try {
+                                    container.setServer(new Server());
+                                    container.getServer().start(portInt, user, pass, mw, container);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                    mw.writeInfo("An IOException occurred when spinning up the server");
+                                }
+                            }
+                        }).start();
+                    }
+                };
+                
+                Thread clientThread = new Thread() {
                     public void run() {
-                        int portInt = Integer.parseInt(thisPort);
                         try {
-                            container.setServer(new Server());
-                            container.getServer().start(portInt, user, pass, mw);
+                            container.setClient();
                         } catch (IOException ex) {
-                            ex.printStackTrace();
-                            mw.writeInfo("An IOException occurred when spinning up the server");
+                            // no, *you* deal with this
+                            throw new RuntimeException("IOException in the client thread, good luck!");
                         }
                     }
-                }).start();
+                };
+                clientThread.setUncaughtExceptionHandler(h);
+                clientThread.start();
             }
         };
     }

@@ -1,7 +1,10 @@
 package edu.ou.cs5173.protocol;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
+import edu.ou.cs5173.io.Client;
+import edu.ou.cs5173.io.SocketContainer;
 import edu.ou.cs5173.ui.MessageWriter;
 
 public class MessageHandler {
@@ -81,7 +84,8 @@ public class MessageHandler {
                 }
                 break;
             case RESPONDENT_CHALLENGE:
-                if (this.hasUser()) {
+                if (m.getRecipient().equals(this.name) && !this.hasUser()) {
+                    this.setPartner(m.getSender());
                     int challenge = Integer.parseInt(m.getPayload());
                     String reply = this.user.solveChallenge(challenge);
                     String ourChallenge = Integer.toString(this.user.setChallenge());
@@ -152,14 +156,14 @@ public class MessageHandler {
         return false;
     }
 
-    public boolean shouldEncrypt(MessageType mt) {
+    public static boolean shouldEncrypt(MessageType mt) {
         return mt == MessageType.CHALLENGE_SUCCESS || mt == MessageType.UPDATE_KEY || mt == MessageType.MESSAGE || mt == MessageType.ABORT;
     }
 
     public void sendMessage(Message m) {
         String toSend;
 
-        if (this.shouldEncrypt(m.getType())) {
+        if (shouldEncrypt(m.getType())) {
             String s = m.serialise();
             mw.writeSentCommunication(s);
             toSend = this.user.encrypt(s);
