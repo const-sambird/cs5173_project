@@ -67,7 +67,6 @@ public class Client implements MessageSender {
     }
 
     public void sendMessage(String msg) throws IOException {
-        System.out.println(msg);
         out.println(msg);
     }
 

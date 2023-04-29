@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -26,7 +24,6 @@ import edu.ou.cs5173.protocol.Message;
 import edu.ou.cs5173.protocol.MessageType;
 import edu.ou.cs5173.io.MessageSender;
 import edu.ou.cs5173.io.OutBuffer;
-import edu.ou.cs5173.io.Server;
 import edu.ou.cs5173.ui.MessageWriter;
 
 public class Main {
@@ -53,7 +50,6 @@ public class Main {
     // app state
     private boolean isLoggedIn = false;
     private String name;
-    private String pwd;
     private MessageWriter mw;
 
     // socket thread
@@ -131,9 +127,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String message = chatBox.getText();
-                System.out.println(message);
                 if (isLoggedIn) {
-                    System.out.println("loggedin");
                     chatBox.setText("");
                     mw.writeMessage(name, message);
                     MessageSender sender = container.getSender();
@@ -181,7 +175,6 @@ public class Main {
                 }
 
                 name = user;
-                pwd = pass;
                 isLoggedIn = true;
                 loginStatus.setText("Logged in.");
                 status.setText("Ready.");

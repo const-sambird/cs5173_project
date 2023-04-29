@@ -1,12 +1,9 @@
 package edu.ou.cs5173.protocol;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import edu.ou.cs5173.io.Client;
-import edu.ou.cs5173.io.SocketContainer;
 import edu.ou.cs5173.ui.MessageWriter;
 
 public class MessageHandler {
@@ -98,7 +95,6 @@ public class MessageHandler {
             case INITIATOR_CHALLENGE:
                 if (this.hasUser()) {
                     String[] p = m.getPayload().split("---");
-                    System.out.println(p[0]);
                     if (p.length != 2) {
                         this.sendMessage(new Message(this.user.getName(), this.user.getPartner(), MessageType.CHALLENGE_FAILED, "null"));
                         break;

@@ -1,6 +1,5 @@
 package edu.ou.cs5173.io;
 
-import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
 
