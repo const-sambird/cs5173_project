@@ -2,6 +2,8 @@ package edu.ou.cs5173.protocol;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import edu.ou.cs5173.io.Client;
 import edu.ou.cs5173.io.SocketContainer;
@@ -87,7 +89,7 @@ public class MessageHandler {
                 if (m.getRecipient().equals(this.name) && !this.hasUser()) {
                     this.setPartner(m.getSender());
                     int challenge = Integer.parseInt(m.getPayload());
-                    String reply = this.user.solveChallenge(challenge);
+                    String reply = new String(Base64.getEncoder().encode(this.user.solveChallenge(challenge).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                     String ourChallenge = Integer.toString(this.user.setChallenge());
                     Message response = new Message(this.user.getName(), this.user.getPartner(), MessageType.INITIATOR_CHALLENGE, reply + "---" + ourChallenge);
                     this.sendMessage(response);
@@ -96,11 +98,12 @@ public class MessageHandler {
             case INITIATOR_CHALLENGE:
                 if (this.hasUser()) {
                     String[] p = m.getPayload().split("---");
+                    System.out.println(p[0]);
                     if (p.length != 2) {
                         this.sendMessage(new Message(this.user.getName(), this.user.getPartner(), MessageType.CHALLENGE_FAILED, "null"));
                         break;
                     }
-                    String challengeResponse = p[0];
+                    String challengeResponse = new String(Base64.getDecoder().decode(p[0]), StandardCharsets.UTF_8);
                     int ourChallenge = Integer.parseInt(p[1]);
                     boolean challengeSuccess = this.user.validateChallenge(challengeResponse);
                     if (!challengeSuccess) {
@@ -108,14 +111,14 @@ public class MessageHandler {
                         break;
                     }
 
-                    String reply = this.user.solveChallenge(ourChallenge);
+                    String reply = new String(Base64.getEncoder().encode(this.user.solveChallenge(ourChallenge).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                     Message response = new Message(this.user.getName(), this.user.getPartner(), MessageType.CHALLENGE_RESPONSE, reply);
                     this.sendMessage(response);
                 }
                 break;
             case CHALLENGE_RESPONSE:
                 if (this.hasUser()) {
-                    boolean challengeSuccess = this.user.validateChallenge(m.getPayload());
+                    boolean challengeSuccess = this.user.validateChallenge(new String(Base64.getDecoder().decode(m.getPayload()), StandardCharsets.UTF_8));
                     if (challengeSuccess) {
                         Message response = new Message(this.user.getName(), this.user.getPartner(), MessageType.CHALLENGE_SUCCESS, "null");
                         this.sendMessage(response);
