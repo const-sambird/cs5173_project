@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import edu.ou.cs5173.io.SocketContainer.ContainerState;
 import edu.ou.cs5173.protocol.MessageHandler;
 import edu.ou.cs5173.ui.MessageWriter;
 
@@ -51,6 +52,16 @@ public class Server {
     private void exec() throws IOException {
         this.handler = new MessageHandler(this.name, this.password, out, mw);
         this.container.createClientThreadIfNotExists();
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            // look i'm going to keep it real with you i don't think this will throw
+        }
+        in = container.getClient().getIn();
+        out = container.getClient().getOut();
+        if (container.getContainerState() == ContainerState.SERVER_FIRST) {
+            container.getClient().sendInitiate();
+        }
         String inputLine;
 
         while ((inputLine = in.readLine()) != null) {

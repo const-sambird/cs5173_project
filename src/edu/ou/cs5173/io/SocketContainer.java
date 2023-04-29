@@ -56,9 +56,6 @@ public class SocketContainer {
             public void run() {
                 boolean success = setClient();
                 System.out.println("returned " + success);
-                if (success) {
-                    getClient().sendInitiate();
-                }
             }
         }).start();
     }
@@ -79,6 +76,10 @@ public class SocketContainer {
         return this.client != null;
     }
 
+    public ContainerState getContainerState() {
+        return this.containerState;
+    }
+
     /**
      * There's two possible states for the SocketContainer to be in.
      * 
@@ -86,7 +87,7 @@ public class SocketContainer {
      * input/output streams correctly, as if we create the server first the iostreams
      * need to be passed to the client, and vice versa.
      */
-    private enum ContainerState {
+    public enum ContainerState {
         SERVER_FIRST,
         CLIENT_FIRST
     }
