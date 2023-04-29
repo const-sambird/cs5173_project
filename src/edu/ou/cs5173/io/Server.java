@@ -11,7 +11,6 @@ import edu.ou.cs5173.protocol.MessageHandler;
 import edu.ou.cs5173.ui.MessageWriter;
 
 public class Server {
-    private SocketContainer container;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
@@ -20,18 +19,38 @@ public class Server {
     private String password;
     private MessageWriter mw;
     private MessageHandler handler;
+    private SocketContainer container;
 
     public void start(int port, String name, String password, MessageWriter mw, SocketContainer container) throws IOException {
         System.out.println("server");
-        this.container = container;
         this.serverSocket = new ServerSocket(port);
         this.clientSocket = serverSocket.accept();
         this.name = name;
         this.password = password;
         this.mw = mw;
+        this.container = container;
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.exec();
+    }
+
+    // this use-case for overloads is considered by the international court of justice to be a war crime
+    public void start(int port, String name, String password, MessageWriter mw, SocketContainer container, PrintWriter out, BufferedReader in) throws IOException {
+        System.out.println("server");
+        this.serverSocket = new ServerSocket(port);
+        this.clientSocket = serverSocket.accept();
+        this.name = name;
+        this.password = password;
+        this.mw = mw;
+        this.container = container;
+        this.out = out;
+        this.in = in;
+        this.exec();
+    }
+
+    private void exec() throws IOException {
         this.handler = new MessageHandler(this.name, this.password, out, mw);
+        this.container.createClientThreadIfNotExists();
         String inputLine;
 
         while ((inputLine = in.readLine()) != null) {

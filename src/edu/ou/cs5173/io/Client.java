@@ -30,21 +30,6 @@ public class Client {
         this.password = password;
         this.partner = partner;
         this.mw = mw;
-        this.handler = new MessageHandler(name, password, out, mw);
-
-        String inputLine;
-
-        while ((inputLine = in.readLine()) != null) {
-            boolean terminate = handler.handle(inputLine);
-            if (terminate) {
-                break;
-            }
-        }
-
-        mw.writeInfo("Session ended.");
-        in.close();
-        out.close();
-        clientSocket.close();
     }
 
     public void sendMessage(String msg) throws IOException {
@@ -75,5 +60,13 @@ public class Client {
         in.close();
         out.close();
         clientSocket.close();
+    }
+
+    public BufferedReader getIn() {
+        return this.in;
+    }
+
+    public PrintWriter getOut() {
+        return this.out;
     }
 }

@@ -179,7 +179,18 @@ public class Main {
                 password.setEditable(false);
                 partner.setEditable(false);
 
-                container = new SocketContainer(host, otherPort, user, pass, other, mw);
+                container = new SocketContainer(thisPort, host, otherPort, user, pass, other, mw);
+
+                Thread serverThread = new Thread() {
+                    public void run() {
+                        try {
+                            container.setServer();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                            mw.writeInfo("An IOException occurred when spinning up the server");
+                        }
+                    }
+                };
 
                 UncaughtExceptionHandler h = new UncaughtExceptionHandler() {
                     @Override
@@ -188,28 +199,18 @@ public class Main {
                         // because the socket failed to connect, so we should start the server instead
                         container.resetClient();
                         mw.writeInfo("Couldn't connect to the remote server on " + host + ":" + otherPort + ", waiting for partner...");
-                        new Thread(new Runnable() {
-                            public void run() {
-                                int portInt = Integer.parseInt(thisPort);
-                                try {
-                                    container.setServer(new Server());
-                                    container.getServer().start(portInt, user, pass, mw, container);
-                                } catch (IOException ex) {
-                                    ex.printStackTrace();
-                                    mw.writeInfo("An IOException occurred when spinning up the server");
-                                }
-                            }
-                        }).start();
+                        serverThread.start();
                     }
                 };
-                
+
                 Thread clientThread = new Thread() {
                     public void run() {
                         try {
                             container.setClient();
+                            serverThread.run();
                         } catch (IOException ex) {
                             // no, *you* deal with this
-                            throw new RuntimeException("IOException in the client thread, good luck!");
+                            throw new RuntimeException("IOException! in the client thread, good luck");
                         }
                     }
                 };
