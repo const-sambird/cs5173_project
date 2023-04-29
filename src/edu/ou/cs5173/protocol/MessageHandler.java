@@ -167,7 +167,7 @@ public class MessageHandler {
             mw.writeSentCommunication("[ENCRYPT] " + toSend);
         } else {
             toSend = m.serialise();
-            mw.writeSentCommunication("[DECRYPT] " + toSend);
+            mw.writeSentCommunication("[UNCRYPT] " + toSend);
         }
         out.println(toSend);
     }
