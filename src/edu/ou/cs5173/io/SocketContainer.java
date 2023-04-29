@@ -5,18 +5,19 @@ import java.io.IOException;
 import edu.ou.cs5173.ui.MessageWriter;
 
 public class SocketContainer {
-    private Server server;
-    private Client client;
-    private String thisPort;
-    private String host;
-    private String port;
-    private String user;
-    private String pass;
-    private String partner;
-    private MessageWriter mw;
-    private ContainerState containerState = ContainerState.CLIENT_FIRST;
+    private volatile Server server;
+    private volatile Client client;
+    private volatile String thisPort;
+    private volatile String host;
+    private volatile String port;
+    private volatile String user;
+    private volatile String pass;
+    private volatile String partner;
+    private volatile MessageWriter mw;
+    private volatile Thread clientThread;
+    private volatile ContainerState containerState = ContainerState.CLIENT_FIRST;
 
-    public SocketContainer(String thisPort, String host, String port, String user, String pass, String partner, MessageWriter mw) {
+    public SocketContainer(String thisPort, String host, String port, String user, String pass, String partner, MessageWriter mw, Thread clientThread) {
         this.thisPort = thisPort;
         this.host = host;
         this.port = port;
@@ -24,6 +25,7 @@ public class SocketContainer {
         this.pass = pass;
         this.partner = partner;
         this.mw = mw;
+        this.clientThread = clientThread;
     }
 
     public synchronized void setServer() throws IOException {
@@ -35,9 +37,11 @@ public class SocketContainer {
         }
     }
 
-    public synchronized void setClient() throws IOException {
+    public boolean setClient() {
+        System.out.println("try-makeclient");
         this.client = new Client();
-        this.client.start(host, Integer.parseInt(port), user, pass, partner, mw);
+        System.out.println("try-start");
+        return this.client.start(host, Integer.parseInt(port), user, pass, partner, mw);
     }
 
     public synchronized void resetClient() {
@@ -49,12 +53,11 @@ public class SocketContainer {
         if (this.hasClient()) return;
 
         new Thread(new Runnable() {
-            @Override
             public void run() {
-                try {
-                    setClient();
-                } catch (IOException ex) {
-                    mw.writeInfo("FATAL: We should've been able to connect by now, but connection failed. Close the app and try again.");
+                boolean success = setClient();
+                System.out.println("returned " + success);
+                if (success) {
+                    getClient().sendInitiate();
                 }
             }
         }).start();
@@ -64,7 +67,7 @@ public class SocketContainer {
         return this.server;
     }
 
-    public synchronized Client getClient() {
+    public Client getClient() {
         return this.client;
     }
 

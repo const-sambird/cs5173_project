@@ -21,22 +21,34 @@ public class Client {
     private MessageWriter mw;
     private MessageHandler handler;
 
-    public void start(String ip, int port, String name, String password, String partner, MessageWriter mw) throws IOException {
-        clientSocket = new Socket(ip, port);
+    public boolean start(String ip, int port, String name, String password, String partner, MessageWriter mw) {
+        System.out.println("client-presocket");
+        try {
+            clientSocket = new Socket(ip, port);
+        } catch (IOException ex) {
+            return false;
+        }
         System.out.println("client");
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        try {
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         this.name = name;
         this.password = password;
         this.partner = partner;
         this.mw = mw;
+        return true;
     }
 
     public void sendMessage(String msg) throws IOException {
+        System.out.println(msg);
         out.println(msg);
     }
 
-    public void sendInitiate(String partner) {
+    public void sendInitiate() {
+        System.out.println("sendinit");
         Message hello = new Message(name, partner, MessageType.INITIATE, "null");
         try {
             this.sendMessage(hello.serialise());
