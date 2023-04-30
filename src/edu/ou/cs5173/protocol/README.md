@@ -1,5 +1,7 @@
 # The Very Good CS5173 Messaging Protocol (VGCMP)
 
+**Note: I made some modifications after typing up this document (which is mostly for my own reference, not intended to be marked). The final protocol definition is included in [the project report](../../../../../cs5173_report.pdf) - that should be considered canonical, not this document!**
+
 ## Communications
 
 Each VGCMP communication is either *encrypted* or *unencrypted*. Encrypted communications are sent in three parts, each divided by a `SEPARATOR` defined in [Message.java](./Message.java).
