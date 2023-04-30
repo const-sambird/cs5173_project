@@ -22,6 +22,22 @@ public class Client implements MessageSender {
     private MessageHandler handler;
     private OutBuffer o;
 
+    /**
+     * Starts the Client socket. The socket will listen on a new Thread
+     * that is created in this method.
+     * 
+     * If the peer server hasn't started yet, no thread will be created and this
+     * method will return false (to indicate that we should start a Server instead).
+     *
+     * @param ip the hostname of the remote server
+     * @param port the port of the remote server
+     * @param name our username
+     * @param password the shared password
+     * @param partner the partner's username
+     * @param mw the GUI MessageWriter
+     * @param o the buffer of messages to be sent
+     * @return whether the client's startup was successful
+     */
     public boolean start(String ip, int port, String name, String password, String partner, MessageWriter mw, OutBuffer o) {
         try {
             clientSocket = new Socket(ip, port);
@@ -66,6 +82,12 @@ public class Client implements MessageSender {
         return true;
     }
 
+    /**
+     * Writes a (String) message to this socket.
+     * Does not write or serialise a Message object - see {@link Client#sendChatMessage(Message)}
+     *
+     * @param msg the message to be written
+     */
     public void sendMessage(String msg) throws IOException {
         out.println(msg);
     }
